@@ -2,8 +2,11 @@
 
 namespace App\Console;
 
+use App\messengerUser;
+use \BotMan\Drivers\Telegram\TelegramDriver;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+
 
 class Kernel extends ConsoleKernel
 {
@@ -24,8 +27,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->call(function () {
+
+            $botman = resolve('botman');
+            $users = messengerUser::where('user_agree', true)->select('id_chat')->get()->keyBy('id_chat')->keys()->toArray();
+            $botman->say('Проверочное сообщение каждую минуту', $users, TelegramDriver::class);
+
+            //mail('mail@to.com', 'mail@out.com', 'Hello');
+        })->everyMinute();
     }
 
     /**
