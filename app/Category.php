@@ -10,9 +10,22 @@ use OpenGraph;
 
 class Category extends Model
 {
-    use NodeTrait, WithData;
+    use NodeTrait ,WithData;
+
+//    public function scopeWithData($query)
+//    {
+//     return $query->with('data');
+//    }
+//
+//    public function data()
+//    {
+//        return $this->hasOne('App\CategoryData');
+//    }
+
+
 
     protected $guarded = [];
+    protected $connection = 'mysql';
 
     public function hasAttribute($attr)
     {

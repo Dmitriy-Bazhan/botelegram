@@ -231,9 +231,9 @@ class Product extends Model
 
     public function scopeJoinData($query)
     {
-        return $query->leftJoin('product_datas', function ($query) {
+        return $query->leftJoin('product_data', function ($query) {
 
-            $query->on('product_datas.product_id', 'products.id')
+            $query->on('product_data.product_id', 'products.id')
                 ->whereLocale('ru');
         });
     }

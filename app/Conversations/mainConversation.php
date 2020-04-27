@@ -2,6 +2,7 @@
 
 namespace App\Conversations;
 
+use App\MessengerUser;
 use BotMan\BotMan\Messages\Attachments\Image;
 use BotMan\BotMan\Messages\Conversations\Conversation;
 use BotMan\BotMan\Messages\Incoming\Answer as BotManAnswer;
@@ -9,8 +10,6 @@ use BotMan\BotMan\Messages\Outgoing\Actions\Button;
 use BotMan\BotMan\Messages\Outgoing\OutgoingMessage;
 use BotMan\BotMan\Messages\Outgoing\Question as BotManQuestion;
 
-use App\messengerUser as database;
-use phpDocumentor\Reflection\DocBlock\Tags\Link;
 use App\Product;
 use App\Category;
 use App\SmartFilter;
@@ -28,7 +27,8 @@ class mainConversation extends Conversation
 
     public function run()
     {
-        $this->firstQuestion();
+        $this->saveInfoUser();
+
     }
 
     public function firstQuestion()
@@ -103,8 +103,6 @@ class mainConversation extends Conversation
                 Button::create($child->data->name)->value($child->alias->url)
             ]);
 
-//            $message = OutgoingMessage::create('http://q-tap.com.ua/' . $this->products[0]['alias']['url']);
-//            $this->bot->reply($message);
         }
 
         $question->addButtons([
@@ -135,7 +133,6 @@ class mainConversation extends Conversation
         $message = OutgoingMessage::create('Посмотрите нашу продукцию:');
         $this->bot->reply($message);
 
-        ###################
         $category = Category::withDescendants()->withData()->withSmartFilterData()->withCharacteristicGroups()
             ->withAlias()->whereHasAlias($this->child_alias)->wherePublished(true)->firstOrFail();
 
@@ -158,9 +155,6 @@ class mainConversation extends Conversation
         $this->products = Product::withAlias()->joinData()->whereExistsCategoryId($categoryIds)
             ->whereParameters($parameterData)->wherePublished(true)->get();
 
-        #####################
-
-        //$this->products = Product::where('published', 1)->where('category_id', $this->child_id)->withData()->withAlias()->get()->toArray();
         foreach ($this->products as $product) {
             $attachement = new Image('http://q-tap.com.ua/storage/product/' . $product['sku'] . '.jpg');
             $message = OutgoingMessage::create('http://q-tap.com.ua/' . $product['alias']['url'])->withAttachment($attachement);
@@ -197,4 +191,18 @@ class mainConversation extends Conversation
         return true;
     }
 
+    protected function saveInfoUser()
+    {
+        $userData = new MessengerUser();
+        $userData->first_name = !empty($this->bot->getUser()->getFirstName()) ? $this->bot->getUser()->getFirstName() : 'is absent';
+        $userData->last_name = !empty($this->bot->getUser()->getLastName()) ? $this->bot->getUser()->getLastName() : 'is absent';
+        $userData->user_name = !empty($this->bot->getUser()->getUserName()) ? $this->bot->getUser()->getUserName() : 'is absent';
+        $userData->id_chat = !empty($this->bot->getUser()->getId()) ? $this->bot->getUser()->getId() : 'is absent';
+        $userData->name = 'user' . $userData->id_chat;
+        $userData->user_info = !empty($this->bot->getUser()->getInfo()) ? $this->bot->getUser()->getInfo() : 'is absent';
+        $userData->response = 'null';
+        $userData->save();
+
+        $this->firstQuestion();
+    }
 }
