@@ -193,16 +193,19 @@ class mainConversation extends Conversation
 
     protected function saveInfoUser()
     {
-        $userData = new MessengerUser();
-        $userData->first_name = !empty($this->bot->getUser()->getFirstName()) ? $this->bot->getUser()->getFirstName() : 'is absent';
-        $userData->last_name = !empty($this->bot->getUser()->getLastName()) ? $this->bot->getUser()->getLastName() : 'is absent';
-        $userData->user_name = !empty($this->bot->getUser()->getUserName()) ? $this->bot->getUser()->getUserName() : 'is absent';
-        $userData->id_chat = !empty($this->bot->getUser()->getId()) ? $this->bot->getUser()->getId() : 'is absent';
-        $userData->name = 'user' . $userData->id_chat;
-        $userData->user_info = !empty($this->bot->getUser()->getInfo()) ? $this->bot->getUser()->getInfo() : 'is absent';
-        $userData->response = 'null';
-        $userData->save();
+        $check = MessengerUser::where('id_chat', $this->bot->getUser()->getId())->first();
 
+        if (!$check) {
+            $userData = new MessengerUser();
+            $userData->first_name = !empty($this->bot->getUser()->getFirstName()) ? $this->bot->getUser()->getFirstName() : 'is absent';
+            $userData->last_name = !empty($this->bot->getUser()->getLastName()) ? $this->bot->getUser()->getLastName() : 'is absent';
+            $userData->user_name = !empty($this->bot->getUser()->getUserName()) ? $this->bot->getUser()->getUserName() : 'is absent';
+            $userData->id_chat = !empty($this->bot->getUser()->getId()) ? $this->bot->getUser()->getId() : 'is absent';
+            $userData->name = 'user' . $userData->id_chat;
+            $userData->user_info = !empty($this->bot->getUser()->getInfo()) ? $this->bot->getUser()->getInfo() : 'is absent';
+            $userData->response = 'null';
+            $userData->save();
+        }
         $this->firstQuestion();
     }
 }
